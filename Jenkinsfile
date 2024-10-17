@@ -42,43 +42,16 @@ pipeline {
                 }
             }
         }
+            stage('4. Docker Image Build') {
+      steps {
+          sh "aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/e4o4k3j4"
+          sh "sudo docker build -t team1 ."
+          sh "sudo docker tag docker tag team1:latest public.ecr.aws/e4o4k3j4/team1:latest"
+          sh "sudo docker push docker push public.ecr.aws/e4o4k3j4/team1:latest"
+      }
+    }
 
-        stage('4. Docker Build and Push to Public ECR') {
-            environment {
-                AWS_REGION = 'us-east-1' // Set the region for public ECR
-                ECR_PUBLIC_REPO = 'public.ecr.aws/e4o4k3j4/team1' // Replace with your ECR Public repo URL
-            }
-
-            steps {
-                script {
-                    // Authenticate with ECR Public
-                    sh '''
-                        #!/bin/bash
-                        echo "Authenticating with AWS ECR Public..."
-                        aws ecr-public get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_PUBLIC_REPO}
-                    '''
-                    
-                    // Build the Docker image
-                    sh '''
-                        echo "Building Docker image..."
-                        docker build -t team1 .
-                    '''
-                    
-                    // Tag the Docker image
-                    sh '''
-                        echo "Tagging Docker image..."
-                        docker tag team1:latest ${ECR_PUBLIC_REPO}:${params.ecr_tag}
-                    '''
-                    
-                    // Push the Docker image to Public ECR
-                    sh '''
-                        echo "Pushing Docker image to Public ECR..."
-                        docker push ${ECR_PUBLIC_REPO}:${params.ecr_tag}
-                    '''
-                }
-            }
-        }
-
+        
         stage('5. Application Deployment in EKS') {
             steps {
                 kubeconfig(caCertificate: '', credentialsId: 'kubeconfig', serverUrl: '') {
