@@ -39,27 +39,47 @@ pipeline {
                 }
             }
         }
-        stage('4. Docker Image Build') {
-             steps {
-                 // Authenticate Docker with public ECR
-                 echo "Logging in to public ECR"
-                 sh """
-                 aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/e4o4k3j4
-                 """
-        
-                 // Build Docker image
-                 echo "Building Docker image"
-                 sh "sudo docker build -t team1 ."
-        
-                 // Tag Docker image
-                 echo "Tagging Docker image"
-                 sh "sudo docker tag team1:latest public.ecr.aws/e4o4k3j4/team1:${params.ecr_tag}"
-        
-                 // Push Docker image to ECR
-                 echo "Pushing Docker image to public ECR"
-                 sh "sudo docker push public.ecr.aws/e4o4k3j4/team1:${params.ecr_tag}"
-           }
-       } 
+        parameters {
+            string(name: 'ECR_TAG', defaultValue: 'latest', description: 'Tag for the Docker image')
+        }
+
+        environment {
+            AWS_REGION = 'us-east-1' // Set the region for public ECR
+            ECR_PUBLIC_REPO = 'public.ecr.aws/e4o4k3j4/team1' // Replace with your ECR Public repo URL
+        }
+
+        stages {
+             stage('Docker Build and Push to Public ECR') {
+                 steps {
+                     script {
+                         // Authenticate with ECR Public
+                         sh '''
+                             echo "Authenticating with AWS ECR Public..."
+                             aws ecr-public get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_PUBLIC_REPO}
+                        '''
+                    
+                        // Build the Docker image
+                        sh '''
+                            echo "Building Docker image..."
+                            docker build -t team1 .
+                        '''
+                    
+                    // Tag the Docker image
+                    sh '''
+                        echo "Tagging Docker image..."
+                        docker tag team1:latest ${ECR_PUBLIC_REPO}:${params.ECR_TAG}
+                    '''
+                    
+                    // Push the Docker image to Public ECR
+                    sh '''
+                        echo "Pushing Docker image to Public ECR..."
+                        docker push ${ECR_PUBLIC_REPO}:${params.ECR_TAG}
+                    '''
+                }
+            }
+        }
+    }
+
 
         stage('5. Application Deployment in EKS') {
             steps {
