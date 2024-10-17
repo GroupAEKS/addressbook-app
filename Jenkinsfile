@@ -45,7 +45,7 @@ pipeline {
                 sh "sudo docker build -t teama."
                 sh "sudo docker push 058264384488.dkr.ecr.us-west-2.amazonaws.com/teama:latest:${params.aws_account}"
                 sh "sudo docker push 058264384488.dkr.ecr.us-west-2.amazonaws.com/teama:latest:${params.aws_account}"
-          }
+            }
         }
 
         stage('5. Application Deployment in EKS') {
