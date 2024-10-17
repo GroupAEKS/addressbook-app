@@ -2,7 +2,6 @@ pipeline {
     agent { node { label "maven-sonarqube-node" } }
 
     parameters {
-        choice(name: 'aws_account', choices: ['058264384488', '4568366404742', '922266408974', '576900672829'], description: 'AWS account hosting image registry')
         choice(name: 'Environment', choices: ['Dev', 'QA', 'UAT', 'Prod'], description: 'Target environment for deployment')
         string(name: 'ecr_tag', defaultValue: '1.6.0', description: 'Assign the ECR tag version for the build')
     }
@@ -46,8 +45,8 @@ pipeline {
       steps {
           sh "aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/e4o4k3j4"
           sh "sudo docker build -t team1 ."
-          sh "sudo docker tag team1:ecr_tag public.ecr.aws/e4o4k3j4/team1:ecr_tag"
-          sh "sudo docker push public.ecr.aws/e4o4k3j4/team1:ecr_tag"
+          sh "sudo docker tag team1:ecr_tag public.ecr.aws/e4o4k3j4/team1:${params.ecr_tag}"
+          sh "sudo docker push public.ecr.aws/e4o4k3j4/team1:${params.ecr_tag}"
       }
     }
 
