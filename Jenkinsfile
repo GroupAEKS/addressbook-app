@@ -46,8 +46,8 @@ pipeline {
       steps {
           sh "aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/e4o4k3j4"
           sh "sudo docker build -t team1 ."
-          sh "sudo docker tag docker tag team1:latest public.ecr.aws/e4o4k3j4/team1:latest"
-          sh "sudo docker push docker push public.ecr.aws/e4o4k3j4/team1:latest"
+          sh "sudo docker tag team1:latest public.ecr.aws/e4o4k3j4/team1:latest"
+          sh "sudo docker push public.ecr.aws/e4o4k3j4/team1:latest"
       }
     }
 
