@@ -2,7 +2,7 @@ pipeline {
     agent { node { label "maven-sonarqube-node" } }
 
     parameters {
-        choice(name: 'aws_account', choices: ['999568710647', '4568366404742', '922266408974', '576900672829'], description: 'AWS account hosting image registry')
+        choice(name: 'aws_account', choices: ['058264384488', '4568366404742', '922266408974', '576900672829'], description: 'AWS account hosting image registry')
         choice(name: 'Environment', choices: ['Dev', 'QA', 'UAT', 'Prod'], description: 'Target environment for deployment')
         string(name: 'ecr_tag', defaultValue: '1.6.0', description: 'Assign the ECR tag version for the build')
     }
