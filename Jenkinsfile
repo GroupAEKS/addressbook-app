@@ -53,6 +53,7 @@ pipeline {
                 script {
                     // Authenticate with ECR Public
                     sh '''
+                        #!/bin/bash
                         echo "Authenticating with AWS ECR Public..."
                         aws ecr-public get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_PUBLIC_REPO}
                     '''
