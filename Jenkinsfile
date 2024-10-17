@@ -31,7 +31,7 @@ pipeline {
                     ${scannerHome}/bin/sonar-scanner  \
                     -Dsonar.projectKey=addressbook-application \
                     -Dsonar.projectName='addressbook-application' \
-                    -Dsonar.host.url=http://34.217.138.248:9000 \
+                    -Dsonar.host.url=http://18.246.39.248:9000 \
                     -Dsonar.login=${SONAR_TOKEN} \
                     -Dsonar.sources=src/main/java/ \
                     -Dsonar.java.binaries=target/classes
