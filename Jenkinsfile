@@ -43,7 +43,7 @@ pipeline {
             steps {
                 sh "sudo aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin 058264384488.dkr.ecr.us-west-2.amazonaws.com"
                 sh "sudo docker build -t teama ."
-                sh "sudo docker push 058264384488.dkr.ecr.us-west-2.amazonaws.com/teama:latest:${params.aws_account}"
+                sh "sudo docker tag teama:latest 058264384488.dkr.ecr.us-west-2.amazonaws.com/teama:latest:${params.aws_account}"
                 sh "sudo docker push 058264384488.dkr.ecr.us-west-2.amazonaws.com/teama:latest:${params.aws_account}"
             }
         }
