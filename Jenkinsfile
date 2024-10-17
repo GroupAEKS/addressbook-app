@@ -73,15 +73,15 @@ pipeline {
         stage('7. Email Notification') {
             steps {
                 mail bcc: 'pamyleitich@gmail.com', 
-                     body: '''Build is complete. Check the application using the URL below:
-https://app.dominionsystem.org/addressbook-1.0
+                     // body: '''Build is complete. Check the application using the URL below:
+// https://app.dominionsystem.org/addressbook-1.0
 Let me know if the changes look okay.
 
-Thanks,
-Dominion System Technologies,
-+1 (313) 413-1477''', 
-                     subject: 'Application Successfully Deployed!', 
-                     to: 'pamyleitich@gmail.com'
+// Thanks,
+// Dominion System Technologies,
+// +1 (313) 413-1477''', 
+                     // subject: 'Application Successfully Deployed!', 
+                     // to: 'pamyleitich@gmail.com'
             }
         }
     }
