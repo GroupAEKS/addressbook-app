@@ -2,7 +2,7 @@ pipeline {
     agent { node { label "maven-sonarqube-node" } }
 
     parameters {
-        choice(name: 'aws_account',choices: ['999568710647', '058264384488', '922266408974','576900672829'], description: 'aws account hosting image registry')
+        choice(name: 'aws_account', choices: ['999568710647', '058264384488', '922266408974', '576900672829'], description: 'AWS account hosting image registry')
         choice(name: 'Environment', choices: ['Dev', 'QA', 'UAT', 'Prod'], description: 'Target environment for deployment')
         string(name: 'ecr_tag', defaultValue: '1.7.0', description: 'Assign the ECR tag version for the build')
     }
@@ -42,19 +42,24 @@ pipeline {
                 }
             }
         }
-      stage('4. Docker Image Build') {
-        steps {
-          sh "aws ecr get-login-password --region us-west-2 | sudo docker login --username AWS --password-stdin ${aws_account}.dkr.ecr.us-west-2.amazonaws.com"
-          sh "sudo docker build -t addressbook ."
-          sh "sudo docker tag addressbook:latest ${aws_account}.dkr.ecr.us-west-2.amazonaws.com/addressbook:${params.ecr_tag}"
-          sh "sudo docker push ${aws_account}.dkr.ecr.us-west-2.amazonaws.com/addressbook:${params.ecr_tag}"
-        }
-    }
 
-        
+        stage('4. Docker Image Build and Push') {
+            steps {
+                script {
+                    def ecrUrl = "${params.aws_account}.dkr.ecr.us-west-2.amazonaws.com"
+                }
+                sh """
+                aws ecr get-login-password --region us-west-2 | sudo docker login --username AWS --password-stdin ${ecrUrl}
+                sudo docker build -t addressbook .
+                sudo docker tag addressbook:latest ${ecrUrl}/addressbook:${params.ecr_tag}
+                sudo docker push ${ecrUrl}/addressbook:${params.ecr_tag}
+                """
+            }
+        }
+
         stage('5. Application Deployment in EKS') {
             steps {
-               withkubeconfig(caCertificate: '', credentialsId: 'kubeconfig', serverUrl: '') {
+                withKubeConfig([credentialsId: 'kubeconfig']) {
                     sh "kubectl apply -f manifest"
                 }
             }
@@ -62,7 +67,7 @@ pipeline {
 
         stage('6. Monitoring Solution Deployment in EKS') {
             steps {
-                withkubeconfig(caCertificate: '', credentialsId: 'kubeconfig', serverUrl: '') {
+                withKubeConfig([credentialsId: 'kubeconfig']) {
                     sh "kubectl apply -k monitoring"
                     sh "script/install_helm.sh"
                     sh "script/install_prometheus.sh"
