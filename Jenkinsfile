@@ -44,7 +44,7 @@ pipeline {
                  // Authenticate Docker with public ECR
                  echo "Logging in to public ECR"
                  sh """
-                 aws ecr-public get-login-password --region us-west-1 | docker login --username AWS --password-stdin public.ecr.aws/e4o4k3j4
+                 aws ecr-public get-login-password --region us-west-2 | docker login --username AWS --password-stdin public.ecr.aws/e4o4k3j4
                  """
         
                  // Build Docker image
