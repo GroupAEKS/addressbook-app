@@ -40,13 +40,26 @@ pipeline {
             }
         }
         stage('4. Docker Image Build') {
-            steps {
-                sh "sudo aws ecr-public get-login-password --region us-west-2 | docker login --username AWS --password-stdin public.ecr.aws/e4o4k3j4"
-                sh "sudo docker build -t team1 ."
-                sh "sudo docker tag team1:latest public.ecr.aws/e4o4k3j4/team1:${params.ecr_tag}"
-                sh "sudo docker push public.ecr.aws/e4o4k3j4/team1:${params.ecr_tag}"
-            }
-        }
+             steps {
+                 // Authenticate Docker with public ECR
+                 echo "Logging in to public ECR"
+                 sh """
+                 aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/e4o4k3j4
+                 """
+        
+                 // Build Docker image
+                 echo "Building Docker image"
+                 sh "docker build -t team1 ."
+        
+                 // Tag Docker image
+                 echo "Tagging Docker image"
+                 sh "docker tag team1:latest public.ecr.aws/e4o4k3j4/team1:${params.ecr_tag}"
+        
+                 // Push Docker image to ECR
+                 echo "Pushing Docker image to public ECR"
+                 sh "docker push public.ecr.aws/e4o4k3j4/team1:${params.ecr_tag}"
+           }
+       } 
 
         stage('5. Application Deployment in EKS') {
             steps {
