@@ -41,10 +41,10 @@ pipeline {
         }
         stage('4. Docker Image Build') {
             steps {
-                sh "sudo aws ecr get-login-password --region us-west-2 | docker login --username AWS --password-stdin 058264384488.dkr.ecr.us-west-2.amazonaws.com"
-                sh "sudo docker build -t teama ."
-                sh "sudo docker tag teama:latest 058264384488.dkr.ecr.us-west-2.amazonaws.com/teama:latest"
-                sh "sudo docker push 058264384488.dkr.ecr.us-west-2.amazonaws.com/teama:latest"
+                sh "sudo aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/e4o4k3j4"
+                sh "sudo docker build -t team1 ."
+                sh "sudo docker tag team1:latest public.ecr.aws/e4o4k3j4/team1:latest"
+                sh "sudo docker push public.ecr.aws/e4o4k3j4/team1:latest"
             }
         }
 
