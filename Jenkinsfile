@@ -49,15 +49,15 @@ pipeline {
         
                  // Build Docker image
                  echo "Building Docker image"
-                 sh "docker build -t team1 ."
+                 sh "sudo docker build -t team1 ."
         
                  // Tag Docker image
                  echo "Tagging Docker image"
-                 sh "docker tag team1:latest public.ecr.aws/e4o4k3j4/team1:${params.ecr_tag}"
+                 sh "sudo docker tag team1:latest public.ecr.aws/e4o4k3j4/team1:${params.ecr_tag}"
         
                  // Push Docker image to ECR
                  echo "Pushing Docker image to public ECR"
-                 sh "docker push public.ecr.aws/e4o4k3j4/team1:${params.ecr_tag}"
+                 sh "sudo docker push public.ecr.aws/e4o4k3j4/team1:${params.ecr_tag}"
            }
        } 
 
