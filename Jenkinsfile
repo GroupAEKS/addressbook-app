@@ -1,7 +1,8 @@
 pipeline {
     agent { node { label "maven-sonarqube-node" } }
+
     parameters {
-        choice(name: 'aws_account', choices: ['999568710647', '4568366404742', '922266408974', '576900672829'], description: 'aws account hosting image registry')
+        choice(name: 'aws_account', choices: ['999568710647', '4568366404742', '922266408974', '576900672829'], description: 'AWS account hosting image registry')
         choice(name: 'Environment', choices: ['Dev', 'QA', 'UAT', 'Prod'], description: 'Target environment for deployment')
         string(name: 'ecr_tag', defaultValue: '1.6.0', description: 'Assign the ECR tag version for the build')
     }
@@ -16,11 +17,13 @@ pipeline {
                 git branch: 'release', credentialsId: 'Github-pat', url: 'https://github.com/GroupAEKS/addressbook-app'
             }
         }
-        stage('2. Build with maven') {
+
+        stage('2. Build with Maven') {
             steps {
                 sh "mvn clean package"
             }
         }
+
         stage('3. SonarQube Analysis') {
             environment {
                 scannerHome = tool 'SonarQube-Scanner-6.2.1'
@@ -39,47 +42,41 @@ pipeline {
                 }
             }
         }
-        parameters {
-            string(name: 'ECR_TAG', defaultValue: 'latest', description: 'Tag for the Docker image')
-        }
 
-        environment {
-            AWS_REGION = 'us-east-1' // Set the region for public ECR
-            ECR_PUBLIC_REPO = 'public.ecr.aws/e4o4k3j4/team1' // Replace with your ECR Public repo URL
-        }
+        stage('4. Docker Build and Push to Public ECR') {
+            environment {
+                AWS_REGION = 'us-east-1' // Set the region for public ECR
+                ECR_PUBLIC_REPO = 'public.ecr.aws/e4o4k3j4/team1' // Replace with your ECR Public repo URL
+            }
 
-        stages {
-             stage('Docker Build and Push to Public ECR') {
-                 steps {
-                     script {
-                         // Authenticate with ECR Public
-                         sh '''
-                             echo "Authenticating with AWS ECR Public..."
-                             aws ecr-public get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_PUBLIC_REPO}
-                        '''
+            steps {
+                script {
+                    // Authenticate with ECR Public
+                    sh '''
+                        echo "Authenticating with AWS ECR Public..."
+                        aws ecr-public get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_PUBLIC_REPO}
+                    '''
                     
-                        // Build the Docker image
-                        sh '''
-                            echo "Building Docker image..."
-                            docker build -t team1 .
-                        '''
+                    // Build the Docker image
+                    sh '''
+                        echo "Building Docker image..."
+                        docker build -t team1 .
+                    '''
                     
                     // Tag the Docker image
                     sh '''
                         echo "Tagging Docker image..."
-                        docker tag team1:latest ${ECR_PUBLIC_REPO}:${params.ECR_TAG}
+                        docker tag team1:latest ${ECR_PUBLIC_REPO}:${params.ecr_tag}
                     '''
                     
                     // Push the Docker image to Public ECR
                     sh '''
                         echo "Pushing Docker image to Public ECR..."
-                        docker push ${ECR_PUBLIC_REPO}:${params.ECR_TAG}
+                        docker push ${ECR_PUBLIC_REPO}:${params.ecr_tag}
                     '''
                 }
             }
         }
-    }
-
 
         stage('5. Application Deployment in EKS') {
             steps {
@@ -101,13 +98,16 @@ pipeline {
 
         stage('7. Email Notification') {
             steps {
-                mail bcc: 'pamyleitich@gmail.com', body: '''Build is Over. Check the application using the URL below:
-                https://app.dominionsystem.org/addressbook-1.0
-                Let me know if the changes look okay.
-                Thanks,
-                Dominion System Technologies,
-                +1 (313) 413-1477''',
-                subject: 'Application was Successfully Deployed!!', to: 'pamyleitich@gmail.com'
+                mail bcc: 'pamyleitich@gmail.com', 
+                     body: '''Build is complete. Check the application using the URL below:
+https://app.dominionsystem.org/addressbook-1.0
+Let me know if the changes look okay.
+
+Thanks,
+Dominion System Technologies,
++1 (313) 413-1477''', 
+                     subject: 'Application Successfully Deployed!', 
+                     to: 'pamyleitich@gmail.com'
             }
         }
     }
